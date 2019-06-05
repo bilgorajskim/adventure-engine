@@ -12,6 +12,10 @@ import { Title } from "./title";
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css?family=Cinzel+Decorative&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Arima+Madurai&display=swap');
+html, body {
+  margin: 0;
+  padding: 0;
+}
   body {
     color: ${props => (props.whiteColor ? "white" : "black")};
     background: #444;
@@ -48,10 +52,18 @@ export const Root = observer(() => {
   return (
     <>
       <GlobalStyle whiteColor />
-      <Title>Royal Adventures</Title>
-      <Container>
-        <ViewComponent />
-      </Container>
+      {ViewComponent === MenuView ? (
+        <>
+          <ViewComponent />
+        </>
+      ) : (
+        <>
+          <Title>Royal Adventures</Title>
+          <Container>
+            <ViewComponent />
+          </Container>
+        </>
+      )}
     </>
   );
 });
