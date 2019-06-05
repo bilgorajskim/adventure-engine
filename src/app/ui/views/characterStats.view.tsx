@@ -224,7 +224,10 @@ export const CharacterStatsView = observer(() => {
           ) : (
             <NoSkillPoints>No more skill points!</NoSkillPoints>
           )}
-          <Button onClick={() => (state.view = GameView.StorySelector)}>
+          <Button
+            disabled={state.character.skillPoints > 0}
+            onClick={() => (state.view = GameView.StorySelector)}
+          >
             Done
           </Button>
         </BottomRightSection>
