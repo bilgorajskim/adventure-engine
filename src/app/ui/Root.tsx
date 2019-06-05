@@ -8,6 +8,7 @@ import { StorySelectorView } from "./views/storySelector.view";
 import { StoryView } from "./views/story.view";
 import styled, { createGlobalStyle } from "styled-components";
 import { Title } from "./title";
+import config from "app/config";
 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css?family=Cinzel+Decorative&display=swap');
@@ -58,7 +59,7 @@ export const Root = observer(() => {
         </>
       ) : (
         <>
-          <Title>Royal Adventures</Title>
+          <Title>{config.title}</Title>
           <Container>
             <ViewComponent />
           </Container>

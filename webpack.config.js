@@ -93,6 +93,11 @@ module.exports = {
     runtimeChunk: true
   },
   plugins: [
+    new webpack.DefinePlugin({
+      "process.env.VERSION": JSON.stringify(require("./package.json").version),
+      "process.env.BUILD_DATE": `"${new Date().toISOString()}"`,
+      "process.env.CONFIG": JSON.stringify(require("./config.json"))
+    }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: "development", // use 'development' unless process.env.NODE_ENV is defined
       DEBUG: false
