@@ -1,0 +1,14 @@
+[build]
+  publish = "build"
+  command = "npm run build"
+
+# The following redirect is intended for use with most SPA's that handles routing internally.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Window-Policy = "Allow"
