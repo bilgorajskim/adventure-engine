@@ -1,4 +1,4 @@
-# Royal Adventures
+# Adventure Engine
 
 An RPG/adventure game engine.
 
