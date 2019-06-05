@@ -3,6 +3,7 @@ import { useObservable, observer } from "mobx-react-lite";
 import { GameState, GameView, CharacterSkill, StateContext } from "app/state";
 import { Button } from "../button";
 import styled from "styled-components";
+import { toJS } from "mobx";
 
 const PointsRemaining = styled.span`
   & > b {
@@ -31,17 +32,22 @@ const SkillRowDiv = styled.div`
   display: flex;
   align-items: center;
   & > span:nth-of-type(1) {
-    width: 140px;
+    width: 120px;
     display: block;
-    margin-left: 20px;
+    margin-left: 5px;
   }
   & > span:nth-of-type(2) {
-    width: 60px;
+    width: 40px;
     display: block;
   }
   & > button {
-    float: right;
-    margin-right: 20px;
+    margin: 0 2px;
+  }
+  & > button:disabled {
+    visibility: hidden;
+  }
+  & > button:last-of-type {
+    margin-right: 5px;
   }
 `;
 const CharacterStats = styled.div`
@@ -76,21 +82,34 @@ const SubTitle = styled.h2`
 const SkillRow = observer(
   ({
     onUpgrade,
+    onDowngrade,
     skill,
     skills,
+    baseSkills,
     skillPoints
   }: {
     onUpgrade: any;
+    onDowngrade: any;
     skill: CharacterSkill;
     skills: any;
+    baseSkills: any;
     skillPoints: number;
   }) => {
     return (
       <SkillRowDiv>
         <span>{skill}</span> <span>{skills[skill]}/15</span>
-        {skillPoints > 0 && skills[skill] < 15 ? (
-          <Button onClick={onUpgrade}>+</Button>
-        ) : null}
+        <Button
+          disabled={!(skills[skill] > 0 && skills[skill] > baseSkills[skill])}
+          onClick={onDowngrade}
+        >
+          -
+        </Button>
+        <Button
+          disabled={!(skillPoints > 0 && skills[skill] < 15)}
+          onClick={onUpgrade}
+        >
+          +
+        </Button>
       </SkillRowDiv>
     );
   }
@@ -99,87 +118,43 @@ const SkillRow = observer(
 const SkillRows = observer(
   ({
     onUpgrade,
+    onDowngrade,
     skillPoints,
-    skills
+    skills,
+    baseSkills
   }: {
     onUpgrade: any;
+    onDowngrade: any;
     skillPoints: number;
     skills: any;
+    baseSkills: any;
   }) => {
+    const skillList = [
+      CharacterSkill.Strength,
+      CharacterSkill.Speed,
+      CharacterSkill.Agility,
+      CharacterSkill.Stamina,
+      CharacterSkill.Endurance,
+      CharacterSkill.Courage,
+      CharacterSkill.Perception,
+      CharacterSkill.Nature,
+      CharacterSkill.Persuasion,
+      CharacterSkill.Craftsmanship,
+      CharacterSkill.Survival,
+      CharacterSkill.Medicine
+    ];
     return (
       <>
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Strength)}
-          skill={CharacterSkill.Strength}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Speed)}
-          skill={CharacterSkill.Speed}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Agility)}
-          skill={CharacterSkill.Agility}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Stamina)}
-          skill={CharacterSkill.Stamina}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Endurance)}
-          skill={CharacterSkill.Endurance}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Courage)}
-          skill={CharacterSkill.Courage}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Perception)}
-          skill={CharacterSkill.Perception}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Nature)}
-          skill={CharacterSkill.Nature}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Persuasion)}
-          skill={CharacterSkill.Persuasion}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Craftsmanship)}
-          skill={CharacterSkill.Craftsmanship}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Survival)}
-          skill={CharacterSkill.Survival}
-          skills={skills}
-        />
-        <SkillRow
-          skillPoints={skillPoints}
-          onUpgrade={onUpgrade.bind(this, CharacterSkill.Medicine)}
-          skill={CharacterSkill.Medicine}
-          skills={skills}
-        />
+        {skillList.map(skill => (
+          <SkillRow
+            skillPoints={skillPoints}
+            onUpgrade={onUpgrade.bind(this, skill)}
+            onDowngrade={onDowngrade.bind(this, skill)}
+            skill={skill}
+            baseSkills={baseSkills}
+            skills={skills}
+          />
+        ))}
       </>
     );
   }
@@ -188,6 +163,15 @@ const SkillRows = observer(
 export const CharacterStatsView = observer(() => {
   const gameState = React.useContext(StateContext);
   const state = useObservable<GameState>(gameState);
+  const [baseSkills, setBaseSkills] = React.useState(null);
+  const [, setBaseSkillPoints] = React.useState(null);
+  React.useEffect(() => {
+    setBaseSkills(toJS(state.character.skills));
+    setBaseSkillPoints(state.character.skillPoints);
+  }, []);
+  if (!baseSkills) {
+    return null;
+  }
   return (
     <>
       <SubTitle>Build your skills</SubTitle>
@@ -203,10 +187,14 @@ export const CharacterStatsView = observer(() => {
         <Abilities />
         <Skills>
           <SkillRows
+            baseSkills={baseSkills}
             skills={state.character.skills}
             skillPoints={state.character.skillPoints}
             onUpgrade={skill => {
               state.character.upgradeSkill(skill);
+            }}
+            onDowngrade={skill => {
+              state.character.downgradeSkill(skill);
             }}
           />
         </Skills>
@@ -228,7 +216,7 @@ export const CharacterStatsView = observer(() => {
             disabled={state.character.skillPoints > 0}
             onClick={() => (state.view = GameView.StorySelector)}
           >
-            Done
+            Continue
           </Button>
         </BottomRightSection>
       </BottomSection>

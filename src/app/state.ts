@@ -42,6 +42,7 @@ export type GameState = {
     };
     skillPoints: number;
     upgradeSkill: (skill: CharacterSkill) => any;
+    downgradeSkill: (skill: CharacterSkill) => any;
   };
   view: GameView;
 };
@@ -66,9 +67,15 @@ export const gameState = observable({
     upgradeSkill: function(skill: CharacterSkill) {
       this.skills[skill] = this.skills[skill] + 1;
       this.skillPoints = this.skillPoints - 1;
+    },
+    downgradeSkill: function(skill: CharacterSkill) {
+      this.skills[skill] = this.skills[skill] - 1;
+      this.skillPoints = this.skillPoints + 1;
     }
   },
   view: GameView.Menu
 } as GameState);
+
+console.log(gameState);
 
 export const StateContext = React.createContext<GameState>(gameState);
